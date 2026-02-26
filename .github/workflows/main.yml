@@ -1,0 +1,98 @@
+name: CI - Cucumber
+ 
+on:
+
+  push:
+
+    branches: [ "**" ]
+
+  pull_request:
+
+    branches: [ "**" ]
+ 
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 30
+ 
+    steps:
+
+      - name: Checkout
+
+        uses: actions/checkout@v4
+ 
+      - name: Set up JDK
+
+        uses: actions/setup-java@v4
+
+        with:
+
+          distribution: temurin
+
+          java-version: "17"
+
+          cache: maven
+ 
+      - name: Build & Test
+
+        run: |
+
+          mvn -B -ntp clean test
+ 
+      - name: Upload Surefire reports
+
+        if: always()
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: surefire-reports
+
+          path: |
+
+            **/target/surefire-reports/**
+
+            **/target/failsafe-reports/**
+ 
+      - name: Upload Cucumber JSON
+
+        if: always()
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: cucumber-json
+
+          path: |
+
+            **/target/cucumber*.json
+
+            **/target/cucumber-report*.json
+
+          if-no-files-found: ignore
+ 
+      - name: Upload Cucumber HTML
+
+        if: always()
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: cucumber-html
+
+          path: |
+
+            **/target/cucumber-html-reports/**
+
+            **/target/cucumber-report/**
+
+            **/target/site/**
+
+          if-no-files-found: ignore
+ 
